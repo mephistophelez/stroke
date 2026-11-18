@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Einfach-Tablet</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1d1d1f;--muted:#6e6e73;--line:#e3e3e8;--green:#1f9d55;--red:#d64545;
+  --y:#FFEDB3;--yb:#E3BF4F;--b:#D3EAFF;--bb:#79B0E3;--p:#FFDCE4;--pb:#E991A8;
+  --g:#D8F4D8;--gb:#7FC97F;--v:#E8E0FF;--vb:#A38FE3;--o:#FFE3CC;--ob:#EBA266;
+  --gap:clamp(10px,2vmin,22px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#fff;color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+  overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+.c-y{background:var(--y);border-color:var(--yb)}.c-b{background:var(--b);border-color:var(--bb)}
+.c-p{background:var(--p);border-color:var(--pb)}.c-g{background:var(--g);border-color:var(--gb)}
+.c-v{background:var(--v);border-color:var(--vb)}.c-o{background:var(--o);border-color:var(--ob)}
+
+/* Kopfleiste */
+.bar{flex:0 0 auto;display:flex;align-items:center;gap:var(--gap);padding:var(--gap)}
+.backbtn{flex:0 0 auto;width:clamp(90px,15vmin,150px);height:clamp(70px,11vmin,110px);border-radius:28px;
+  border:4px solid #c7c7cd;background:#f2f2f5;font-size:clamp(40px,7vmin,64px);
+  display:flex;align-items:center;justify-content:center}
+.bar .title{flex:1;font-size:clamp(26px,5vmin,48px);font-weight:800;display:flex;gap:16px;align-items:center;min-width:0}
+.bar .title span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barbtn{flex:0 0 auto;width:clamp(80px,13vmin,130px);height:clamp(70px,11vmin,110px);border-radius:28px;
+  border:4px solid var(--bb);background:var(--b);font-size:clamp(36px,6vmin,58px);display:flex;align-items:center;justify-content:center}
+.main{flex:1 1 auto;min-height:0;padding:0 var(--gap) var(--gap);position:relative}
+
+/* Kacheln */
+.tiles{height:100%;display:grid;gap:var(--gap);grid-auto-rows:1fr}
+.tile{border-radius:36px;border-width:5px;border-style:solid;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;font-weight:800;font-size:clamp(22px,4.2vmin,44px);text-align:center;padding:8px;
+  transition:transform .08s, opacity .3s;min-height:0;overflow:hidden}
+.tile .ic{font-size:clamp(56px,14vmin,150px);line-height:1.05}
+.pressed{transform:scale(.95);filter:brightness(.94)}
+
+/* Start */
+.home{height:100%;display:flex;flex-direction:column;padding:var(--gap);gap:var(--gap)}
+.clock{display:flex;align-items:center;justify-content:center;gap:clamp(16px,4vw,48px);flex-wrap:wrap;padding-top:4px}
+.time{font-size:clamp(60px,14vmin,150px);font-weight:800;line-height:1;letter-spacing:-2px}
+.date{font-size:clamp(26px,5.5vmin,56px);font-weight:800;line-height:1.1}
+.date2{font-size:clamp(20px,4vmin,40px);color:#444;margin-top:4px}
+.grid4{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr;gap:var(--gap)}
+@media (orientation:landscape){.grid4{grid-template-columns:repeat(4,1fr)}}
+.home5 .tile:last-child{grid-column:span 2}
+@media (orientation:landscape){.grid4.home5{grid-template-columns:repeat(5,1fr)}.home5 .tile:last-child{grid-column:auto}}
+/* Schreiben */
+.wmain{display:flex;flex-direction:column;gap:var(--gap)}
+.wtop{display:flex;gap:var(--gap);flex:0 0 24%;min-height:0}
+.wtext{flex:1;min-width:0;border:4px solid var(--line);border-radius:24px;padding:10px 18px;font-size:clamp(28px,5.5vmin,56px);font-weight:600;
+  overflow-y:auto;line-height:1.25;word-break:break-word;white-space:pre-wrap}
+.wtext .ph{color:#c7c7cd}
+.caret{display:inline-block;width:4px;height:1em;background:var(--ink);vertical-align:-.12em;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.wbtns{display:flex;gap:var(--gap)}
+.wb{width:clamp(76px,13vmin,140px);border-radius:28px;border-width:5px;border-style:solid;display:flex;align-items:center;justify-content:center;font-size:clamp(38px,8vmin,80px)}
+.words{display:flex;flex-wrap:wrap;gap:clamp(6px,1.2vmin,10px);flex:0 0 auto}
+.chip{padding:8px 16px;border-radius:999px;border:3px solid var(--vb);background:var(--v);font-size:clamp(18px,3vmin,28px);font-weight:700}
+.kb{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(5px,1.1vmin,12px)}
+.kr{flex:1;display:flex;gap:clamp(5px,1.1vmin,12px);justify-content:center;min-height:0}
+.key{flex:1 1 0;max-width:9%;border-radius:16px;border:3px solid #c7c7cd;background:#f7f7f9;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(22px,4.5vmin,48px);font-weight:700}
+.key.k2{flex:2;max-width:none}.key.k6{flex:6;max-width:none}.key.k3{flex:2.5;max-width:none}
+.kdel{background:var(--p);border-color:var(--pb)}
+.ovltext{max-height:32vh;overflow:auto}
+.hint{text-align:center;color:#b0b0b5;font-size:15px}
+
+/* Spiele */
+.card{border-radius:28px;border:5px solid var(--bb);background:var(--b);display:flex;align-items:center;justify-content:center;
+  font-size:clamp(50px,13vmin,140px);transition:transform .15s, background .2s;min-height:0}
+.card .face{opacity:0;transition:opacity .15s}
+.card.up{background:#fff}.card.up .face{opacity:1}
+.card.done{background:#E6F7E6;border-color:var(--gb)}
+.gt{font-size:clamp(60px,17vmin,180px)}
+.tile.right{background:#CFF2CF;border-color:var(--green);transform:scale(1.04)}
+.tile.wrong{opacity:.25;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.same{height:100%;display:flex;flex-direction:column;gap:var(--gap)}
+.target{flex:0 0 38%;display:flex;align-items:center;justify-content:center;border:6px dashed #c7c7cd;border-radius:36px;
+  font-size:clamp(70px,22vmin,220px)}
+.same .tiles{flex:1;height:auto}
+.prompt{text-align:center;font-size:clamp(26px,5vmin,48px)}
+#sky{overflow:hidden}
+.balloon{position:absolute;font-size:clamp(80px,16vmin,160px);line-height:1;animation:rise linear forwards;touch-action:none;padding:10px}
+@keyframes rise{to{transform:translateY(var(--d))}}
+.score{position:absolute;right:var(--gap);top:0;font-size:clamp(36px,7vmin,70px);font-weight:800;z-index:2}
+
+/* Bilder */
+.scroll{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,28vmin,260px),1fr));gap:var(--gap)}
+.pgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:24px;display:block;background:#f2f2f5;pointer-events:none}
+.pgrid .ph{border-radius:24px;border:4px solid var(--line)}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9a9aa0;text-align:center;gap:10px;font-size:clamp(20px,4vmin,34px)}
+.empty .ic{font-size:clamp(90px,24vmin,220px);opacity:.6}
+.viewer{height:100%;position:relative;border-radius:24px;overflow:hidden;background:#f6f6f8}
+.viewer img{width:100%;height:100%;object-fit:contain;display:block;touch-action:none}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:clamp(80px,13vmin,130px);height:clamp(80px,13vmin,130px);
+  border-radius:50%;background:rgba(255,255,255,.92);border:4px solid #c7c7cd;font-size:clamp(40px,7vmin,64px);
+  display:flex;align-items:center;justify-content:center}
+.nav.l{left:14px}.nav.r{right:14px}
+.nav.pressed{transform:translateY(-50%) scale(.94)}
+
+/* Malen */
+.drawwrap{height:100%;border:4px solid var(--line);border-radius:24px;overflow:hidden;background:#fff}
+#cv{display:block;touch-action:none}
+.tools{flex:0 0 auto;display:flex;gap:clamp(8px,1.6vmin,16px);justify-content:center;align-items:center;padding:0 var(--gap) var(--gap);flex-wrap:wrap}
+.dot{width:clamp(52px,9vmin,88px);height:clamp(52px,9vmin,88px);border-radius:50%;border:5px solid #fff;box-shadow:0 0 0 3px #ccc}
+.dot.sel{box-shadow:0 0 0 7px var(--ink)}
+.tool{width:clamp(60px,10vmin,96px);height:clamp(60px,10vmin,96px);border-radius:24px;border:4px solid #c7c7cd;background:#f2f2f5;
+  font-size:clamp(32px,6vmin,54px);display:flex;align-items:center;justify-content:center}
+.tool.sel{border-color:var(--ink);background:#fff}
+
+/* Nachrichten */
+.av{border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#fff;border:4px solid rgba(0,0,0,.08);flex:0 0 auto}
+.ctile .av{width:clamp(90px,20vmin,200px);height:clamp(90px,20vmin,200px);font-size:clamp(54px,12vmin,120px)}
+.qt{font-size:clamp(18px,3.4vmin,34px)}
+.qt .ic{font-size:clamp(50px,11vmin,120px)}
+
+/* Overlays */
+.ovl{position:fixed;inset:0;background:rgba(255,255,255,.96);z-index:50;display:flex;align-items:center;justify-content:center;padding:var(--gap)}
+.ovlbox{display:flex;flex-direction:column;align-items:center;gap:clamp(16px,4vmin,40px);width:100%;max-width:1000px}
+.ovlbig{display:flex;align-items:center;gap:clamp(12px,3vw,36px);font-size:clamp(70px,16vmin,160px);flex-wrap:wrap;justify-content:center}
+.ovltext{font-size:clamp(28px,6vmin,60px);font-weight:800;text-align:center}
+.ovlnote{font-size:clamp(16px,2.6vmin,22px);color:var(--muted);text-align:center;max-width:700px}
+.ovlbtns{display:flex;gap:clamp(20px,6vw,80px)}
+.bigbtn{width:clamp(130px,26vmin,240px);height:clamp(110px,20vmin,190px);border-radius:40px;border:6px solid;
+  display:flex;align-items:center;justify-content:center;font-size:clamp(60px,12vmin,120px);color:#fff;text-decoration:none;font-weight:800}
+.bigbtn.yes{background:var(--green);border-color:#157a40}
+.bigbtn.no{background:#9a9aa0;border-color:#7a7a80}
+.celebrate{position:fixed;inset:0;z-index:60;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;
+  gap:40px;font-size:clamp(100px,26vmin,260px);pointer-events:none}
+@keyframes bounce{from{transform:translateY(20px) scale(.95)}to{transform:translateY(-20px) scale(1.08)}}
+
+/* Einstellungen (für Angehörige – normale Größe) */
+.admin{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:20px;font-size:18px;
+  -webkit-user-select:text;user-select:text;max-width:900px;margin:0 auto;width:100%}
+.ahead{display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:-20px;background:#fff;padding:12px 0;z-index:2;border-bottom:1px solid var(--line)}
+.admin h1{font-size:26px;margin:0}.admin h2{font-size:21px;margin:0 0 12px}
+.admin section{padding:18px 0;border-bottom:1px solid var(--line)}
+.admin label{display:block;margin:10px 0}
+.admin input[type=text],.admin input[type=tel],.admin select{display:block;width:100%;max-width:420px;font-size:18px;padding:10px 12px;
+  border:2px solid #cfcfd4;border-radius:12px;margin-top:4px;background:#fff;color:var(--ink)}
+.admin .chk{display:flex;align-items:center;gap:12px}
+.admin .chk input{width:26px;height:26px}
+.abtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:18px;font-weight:700;padding:12px 20px;border-radius:14px;
+  background:#1d1d1f;color:#fff;border:0;margin:6px 8px 6px 0;cursor:pointer}
+.abtn.light{background:#f2f2f5;color:var(--ink);border:2px solid #cfcfd4}
+.abtn.red{background:#fff;color:var(--red);border:2px solid var(--red)}
+.abtn.sm{font-size:15px;padding:8px 12px}
+.crow{display:flex;align-items:center;gap:12px;padding:8px 0}
+.crow .av{width:52px;height:52px;font-size:30px}
+.crow .meta{flex:1;min-width:0}.crow .meta small{color:var(--muted);display:block}
+.emorow{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.emorow span{font-size:34px;width:58px;height:58px;display:flex;align-items:center;justify-content:center;border-radius:14px;border:3px solid transparent;background:#f2f2f5}
+.emorow span.sel{border-color:var(--ink);background:#fff}
+.msg{color:var(--red);min-height:1.2em}.ok{color:var(--green)}
+.note{color:var(--muted);font-size:16px;line-height:1.45}
+.prev{width:72px;height:72px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-left:10px}
+
+/* ===== Ruhiges Design für Erwachsene ===== */
+:root{--ink:#1F2933;--muted:#5F6B76;--line:#D5DBE1;--green:#2E7D4F;--soft:#F3F5F7}
+.c-y,.c-b,.c-p,.c-g,.c-v,.c-o{background:#fff;border-color:var(--line)}
+.tile{border-radius:22px;border-width:2px;font-weight:700;letter-spacing:.2px}
+.tile.solid{background:var(--k);border-color:var(--k);color:#fff}
+.tile.plain{background:#fff;border-color:var(--line)}
+.tile .ic .svg{width:clamp(54px,12vmin,128px);height:clamp(54px,12vmin,128px);stroke-width:1.6}
+.tile.plain .ic{color:var(--k)}
+.qt .ic{font-size:clamp(44px,9vmin,96px)}
+.pressed{transform:scale(.97);filter:brightness(.93)}
+.time{font-weight:700;letter-spacing:-1px}.date{font-weight:700}.date2{color:var(--muted)}
+.backbtn,.barbtn{border-radius:18px;border:2px solid var(--line);background:var(--soft);color:var(--ink)}
+.backbtn .svg,.barbtn .svg{width:55%;height:55%;stroke-width:2}
+.bar{border-bottom:1px solid var(--line);margin-bottom:var(--gap)}
+.bar .title{font-weight:700;gap:14px}.bar .title .svg{width:1.15em;height:1.15em;stroke-width:2}
+.card{border-radius:18px;border:2px solid #C9D2DB;background:var(--soft)}
+.card.up{background:#fff;border-color:#8A99A8}.card.done{background:#EEF6F0;border-color:#9BC4A8}
+.target{border:2px solid var(--line);background:var(--soft);border-radius:22px}
+.tile.right{background:#EEF6F0;border-color:var(--green)}
+.drawwrap{border:2px solid var(--line);border-radius:18px}
+.tool{border-radius:16px;border:2px solid var(--line);background:var(--soft);color:var(--ink)}
+.tool .svg{width:58%;height:58%;stroke-width:2}.tool.sel{border-color:var(--ink);background:#fff}
+.dot{border:4px solid #fff;box-shadow:0 0 0 2px var(--line)}.dot.sel{box-shadow:0 0 0 5px var(--ink)}
+.nav{background:rgba(255,255,255,.95);border:2px solid var(--line);color:var(--ink)}
+.nav .svg{width:55%;height:55%;stroke-width:2.2}
+.viewer{border-radius:18px;background:var(--soft)}
+.pgrid img,.pgrid .ph{border-radius:14px}.pgrid .ph{border:2px solid var(--line)}
+.empty .ic .svg{width:clamp(90px,20vmin,180px);height:clamp(90px,20vmin,180px);stroke-width:1.2}
+.empty .ic{opacity:1;color:#AEB7C0}
+.av{border:2px solid var(--line);background:var(--soft)}
+.bigbtn{border-radius:24px;border-width:0}
+.bigbtn .svg{width:50%;height:50%;stroke-width:2.6}
+.bigbtn.no{background:#E4E8EC;color:var(--ink)}
+.ovltext{font-weight:700}
+.chip{border:2px solid var(--line);background:#fff;font-weight:700;border-radius:14px}
+.key{border-radius:12px;border:2px solid var(--line);background:var(--soft)}
+.kdel{background:#F6E9E6;border-color:#E2C4BC}
+.wb{border-radius:18px;border-width:0;color:#fff;background:var(--k)}
+.wb .svg{width:55%;height:55%;stroke-width:2}
+.wtext{border:2px solid var(--line);border-radius:18px;font-weight:400}
+.score{font-weight:700;color:var(--muted);font-size:clamp(26px,5vmin,46px)}
+.celebrate{background:rgba(255,255,255,.6);animation:fadein .2s}
+.cbox{background:#fff;border-radius:28px;padding:clamp(24px,5vmin,48px) clamp(36px,8vmin,80px);box-shadow:0 12px 40px rgba(31,41,51,.18);
+  display:flex;flex-direction:column;align-items:center;gap:14px;font-size:clamp(28px,5vmin,48px);font-weight:700;color:var(--ink)}
+.cbox .svg{width:clamp(80px,16vmin,140px);height:clamp(80px,16vmin,140px);color:#fff;background:var(--green);border-radius:50%;padding:18%;stroke-width:2.6}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const land=()=>innerWidth>innerHeight*1.15;
+
+/* ---------- Speicher ---------- */
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+const S=Object.assign({speak:true,sound:true,saver:true,hint:true,idle:120,cc:'43',speed:.8},lsGet('et_settings',{}));
+const saveS=()=>lsSet('et_settings',S);
+let contacts=lsGet('et_contacts',[]);
+const saveC=()=>lsSet('et_contacts',contacts);
+
+let dbp=null;const memStore=[];
+function idb(){if(!dbp)dbp=new Promise((res,rej)=>{try{const r=indexedDB.open('einfach-tablet',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('photos',{keyPath:'id',autoIncrement:true});
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});return dbp}
+async function dbAll(){try{const db=await idb();return await new Promise((res,rej)=>{const q=db.transaction('photos').objectStore('photos').getAll();q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}catch(e){return memStore}}
+async function dbAdd(rec){try{const db=await idb();await new Promise((res,rej)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').add(rec);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}catch(e){rec.id=Date.now()+Math.random();memStore.push(rec)}}
+async function dbClear(){try{const db=await idb();await new Promise((res,rej)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').clear();tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}catch(e){}memStore.length=0}
+let photoList=null;
+async function getPhotos(){if(photoList)return photoList;const recs=await dbAll();
+  photoList=recs.map(r=>({id:r.id,full:URL.createObjectURL(r.full),thumb:URL.createObjectURL(r.thumb||r.full)}));return photoList}
+function resetPhotos(){if(photoList)photoList.forEach(p=>{URL.revokeObjectURL(p.full);URL.revokeObjectURL(p.thumb)});photoList=null}
+async function resize(file,max,square){try{
+  const bmp=await createImageBitmap(file,{imageOrientation:'from-image'});
+  let w=bmp.width,h=bmp.height,sx=0,sy=0,sw=w,sh=h;
+  if(square){const s=Math.min(w,h);sx=(w-s)/2;sy=(h-s)/2;sw=sh=s;w=h=s}
+  const k=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');
+  c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(bmp,sx,sy,sw,sh,0,0,c.width,c.height);
+  return await new Promise(r=>c.toBlob(b=>r(b||file),'image/jpeg',.85))}catch(e){return file}}
+const toDataURL=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.onerror=()=>r(null);f.readAsDataURL(b)});
+
+/* ---------- Ton & Sprache ---------- */
+function speak(t,force){if((!S.speak&&!force)||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='de-DE';u.rate=.9;speechSynthesis.speak(u)}catch(e){}}
+let actx=null;
+function tone(freqs,step=.12,len=.5,vol=.18,type='sine'){if(!S.sound)return;try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==='suspended')actx.resume();
+  freqs.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;const t=actx.currentTime+i*step;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+len);
+  o.connect(g).connect(actx.destination);o.start(t);o.stop(t+len+.05)})}catch(e){}}
+const chime=()=>tone([523,659,784]);
+const ding=()=>tone([660,880],.08,.35);
+const popSnd=()=>tone([900,500],.04,.15,.15,'triangle');
+
+/* ---------- Navigation ---------- */
+let cur={name:'home',arg:null},gen=0,timers=[],slideOn=false,resizeHook=null;
+const parent={games:'home',photos:'home',draw:'home',contacts:'home',write:'home',memory:'games',same:'games',odd:'games',balloons:'games',ball:'games',hop:'games',space:'games',mouse:'games',viewer:'photos',contact:'contacts',admin:'home'};
+const LABEL={games:'Spiele',photos:'Bilder',draw:'Malen',contacts:'Nachrichten',write:'Schreiben',memory:'Memory',same:'Gleiches finden',odd:'Was passt nicht?',balloons:'Ballons',ball:'Ball',hop:'Springen',space:'Weltraum',mouse:'Sammeln'};
+function later(fn,ms){const g=gen;const t=setTimeout(()=>{if(g===gen)fn()},ms);timers.push(t);return t}
+function every(fn,ms){const t=setInterval(fn,ms);timers.push(t);return t}
+function go(name,arg){gen++;timers.forEach(t=>{clearTimeout(t);clearInterval(t)});timers=[];slideOn=false;resizeHook=null;closeOvl();
+  document.querySelectorAll('.celebrate').forEach(e=>e.remove());
+  cur={name,arg};(screens[name]||screens.home)(arg);resetIdle()}
+function bar(icon,label,extra=''){const b=ic(parent[cur.name]==='home'?'home':'back');
+  const ico=P[icon]?`<span style="color:${KC[icon]||'inherit'};display:inline-flex">${ic(icon)}</span>`:`<span>${icon}</span>`;
+  return `<div class="bar"><div class="backbtn" data-tap="back">${b}</div><div class="title">${ico}<span>${esc(label)}</span></div>${extra}</div>`}
+function celebrate(then){chime();const g=gen;const d=document.createElement('div');d.className='celebrate';d.innerHTML=`<div class="cbox">${ic('check')}<div>Gut gemacht</div></div>`;
+  document.body.appendChild(d);setTimeout(()=>{d.remove();if(g===gen&&then)then()},1400)}
+
+/* ---------- Fehlertolerantes Tippen ----------
+   Ein Tipp zählt erst beim Loslassen und nur, wenn der Finger noch auf derselben Fläche ist.
+   Mehrere Finger gleichzeitig (z.B. Handballen) werden ignoriert. Doppeltipps innerhalb 350 ms zählen einmal. */
+const A={};let downEl=null,pointers=new Set(),multi=false,lastTap=0;
+document.addEventListener('pointerdown',e=>{
+  if(e.isPrimary)pointers.clear();pointers.add(e.pointerId);
+  resetIdle();cornerCheck(e);
+  if(pointers.size>1){multi=true;if(downEl)downEl.classList.remove('pressed');downEl=null;return}
+  multi=false;const el=e.target.closest('[data-tap]');if(el){downEl=el;el.classList.add('pressed')}},true);
+document.addEventListener('pointerup',e=>{pointers.delete(e.pointerId);const el=downEl;downEl=null;if(!el)return;el.classList.remove('pressed');
+  if(multi)return;const over=document.elementFromPoint(e.clientX,e.clientY);if(!over||over.closest('[data-tap]')!==el)return;
+  const now=Date.now();if(now-lastTap<350)return;lastTap=now;const fn=A[el.dataset.tap];if(fn)fn(el.dataset.arg,el)},true);
+document.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);if(downEl)downEl.classList.remove('pressed');downEl=null},true);
+document.addEventListener('contextmenu',e=>{if(!e.target.closest('.admin'))e.preventDefault()});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+addEventListener('resize',()=>{resizeHook&&resizeHook()});
+
+/* ---------- Ecken-Geste: ↖ ↗ ↘ ↙ innerhalb von 8 Sekunden ---------- */
+let cseq=0,ct=0;
+function cornerCheck(e){const w=innerWidth,h=innerHeight,s=Math.max(70,Math.min(w,h)*.11),x=e.clientX,y=e.clientY;
+  let c=-1;if(x<s&&y<s)c=0;else if(x>w-s&&y<s)c=1;else if(x>w-s&&y>h-s)c=2;else if(x<s&&y>h-s)c=3;
+  const now=Date.now();if(now-ct>8000)cseq=0;
+  if(c===cseq){if(c===0)ct=now;cseq++;if(cseq===4){cseq=0;setTimeout(()=>{if(cur.name!=='admin')go('admin')},60)}}
+  else{cseq=c===0?1:0;if(c===0)ct=now}}
+
+/* ---------- Ruhe: nach X Sekunden zurück zum Start, danach Diashow ---------- */
+let idleT=null;
+function resetIdle(){clearTimeout(idleT);if(!S.idle)return;idleT=setTimeout(onIdle,S.idle*1000)}
+async function onIdle(){if(cur.name==='admin'||slideOn){resetIdle();return}
+  if(cur.name!=='home'){go('home');return}
+  if(S.saver){const p=await getPhotos();if(p.length&&cur.name==='home'){go('viewer',0);startSlide()}}}
+
+/* ---------- Bestätigen ---------- */
+function closeOvl(){const o=$('#ovl');if(o)o.remove()}
+function confirmBox({big,text,note,href,onYes}){closeOvl();const d=document.createElement('div');d.id='ovl';d.className='ovl';
+  const yes=href?`<a class="bigbtn yes" id="ovlYes" href="${esc(href)}" target="_blank" rel="noopener">${ic('check')}</a>`:`<div class="bigbtn yes" data-tap="ovlYes">${ic('check')}</div>`;
+  d.innerHTML=`<div class="ovlbox"><div class="ovlbig">${big}</div>${text?`<div class="ovltext">${esc(text)}</div>`:''}
+  <div class="ovlbtns"><div class="bigbtn no" data-tap="ovlNo">${ic('x')}</div>${yes}</div>${note?`<div class="ovlnote">${esc(note)}</div>`:''}</div>`;
+  document.body.appendChild(d);A._yes=onYes;
+  if(href)$('#ovlYes').addEventListener('click',()=>{setTimeout(()=>{closeOvl();onYes&&onYes()},300)})}
+A.ovlNo=()=>closeOvl();
+A.ovlYes=()=>{const f=A._yes;closeOvl();f&&f()};
+
+/* ---------- Symbole ---------- */
+const P={
+ home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',
+ games:'<rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle cx="8.5" cy="8.5" r="1.1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.1" fill="currentColor"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.1" fill="currentColor"/>',
+ photos:'<rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="M3.5 17.5l5-5 4 4 3-3 5 5"/>',
+ draw:'<path d="M4 20l1-4.5L16 4.5l3.5 3.5L8.5 19z"/><path d="M14 6.5l3.5 3.5"/>',
+ contacts:'<path d="M4 5.5h16v10.5H10l-4.5 4v-4H4z"/>',
+ write:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h1M9.5 10h1M13 10h1M16.5 10h1M7.5 14h9"/>',
+ speak:'<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+ send:'<path d="M21 3 3 10.5l7 2.5 2.5 7z"/><path d="M10 13 21 3"/>',
+ trash:'<path d="M4 7h16"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13h9l1-13"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>', x:'<path d="M6 6l12 12M18 6 6 18"/>',
+ left:'<path d="M15 5l-7 7 7 7"/>', right:'<path d="M9 5l7 7-7 7"/>',
+ play:'<path d="M8 5v14l11-7z"/>', pause:'<path d="M8.5 5v14M15.5 5v14"/>',
+ memory:'<rect x="3" y="6" width="10" height="14" rx="2"/><rect x="11" y="4" width="10" height="14" rx="2"/>',
+ same:'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/>',
+ odd:'<circle cx="7" cy="7.5" r="3.5"/><rect x="13.5" y="4" width="7" height="7" rx="1"/><path d="M7 13.5l4 7H3z"/><circle cx="17" cy="17" r="3.5" stroke-dasharray="2 2"/>',
+ balloons:'<ellipse cx="12" cy="9" rx="6" ry="7"/><path d="M12 16v1.5M12 17.5c0 2-2 2.5-1 4"/>',
+ ball:'<circle cx="12" cy="8" r="4"/><path d="M5 20h14"/><path d="M12 13v3" stroke-dasharray="1.5 1.5"/>',
+ hop:'<path d="M3 20h18"/><path d="M5 19c2-9 8-11 12-3"/><path d="M17 16l.5-3.5M17 16l-3.3-1"/>',
+ space:'<path d="M12 3c3 2.5 4.5 6 4.5 10.5L12 17l-4.5-3.5C7.5 9 9 5.5 12 3z"/><circle cx="12" cy="10" r="1.6"/><path d="M7.5 13.5 5 17l3 .5M16.5 13.5 19 17l-3 .5M10.5 19.5h3"/>',
+ mouse:'<path d="M19.5 7.5A8.5 8.5 0 1 0 19.5 16.5L12 12z"/><circle cx="12" cy="7.8" r="1" fill="currentColor"/>',
+ eraser:'<path d="M15 4l5 5-9.5 9.5H6L3.5 16z"/><path d="M10 18.5h10M9 9.5l5 5"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 20.5c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+ thin:'<path d="M5 17c4-8 10-8 14-10" stroke-width="1.6"/>', thick:'<path d="M5 17c4-8 10-8 14-10" stroke-width="4.5"/>'
+};
+const KC={games:'#2F6690',photos:'#3A7D5C',draw:'#B4553A',contacts:'#1F7A7A',write:'#6A4C93',
+  memory:'#2F6690',same:'#8C6514',odd:'#6A4C93',balloons:'#B4553A',ball:'#3A7D5C',hop:'#1F7A7A',space:'#4A5868',mouse:'#9A4A6A'};
+function ic(n){return `<svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n]||''}</svg>`}
+
+/* ---------- Bildschirme ---------- */
+const screens={};
+A.back=()=>go(parent[cur.name]||'home');
+A.open=a=>{go(a);speak(LABEL[a]||'')};
+
+function dayPart(h){if(h>=5&&h<11)return['🌅','Morgen'];if(h<14&&h>=11)return['☀️','Mittag'];if(h<18&&h>=14)return['🌤️','Nachmittag'];if(h<22&&h>=18)return['🌆','Abend'];return['🌙','Nacht']}
+function drawClock(){const el=$('#clock');if(!el)return;const d=new Date();
+  const t=d.toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'});
+  const wd=d.toLocaleDateString('de-AT',{weekday:'long'});const dm=d.toLocaleDateString('de-AT',{day:'numeric',month:'long'});const [pi,pn]=dayPart(d.getHours());
+  el.innerHTML=`<div class="time">${t}</div><div><div class="date">${wd}</div><div class="date2">${dm} · ${pn}</div></div>`}
+
+screens.home=()=>{
+  const T=[['games','Spiele'],['photos','Bilder'],['draw','Malen'],['contacts','Nachrichten'],['write','Schreiben']];
+  app.innerHTML=`<div class="home"><div class="clock" id="clock"></div>
+   <div class="grid4 home5">${T.map(t=>`<div class="tile solid" style="--k:${KC[t[0]]}" data-tap="open" data-arg="${t[0]}"><div class="ic">${ic(t[0])}</div><div>${t[1]}</div></div>`).join('')}</div>
+   ${S.hint?'<div class="hint">Einstellungen: nacheinander die Ecken antippen ↖ ↗ ↘ ↙</div>':''}</div>`;
+  drawClock();every(drawClock,10000)};
+
+screens.games=()=>{
+  const T=[['memory','Memory'],['same','Gleiches finden'],['odd','Was passt nicht?'],['balloons','Ballons'],
+    ['ball','Ball'],['hop','Springen'],['space','Weltraum'],['mouse','Sammeln']];
+  app.innerHTML=bar('games','Spiele')+`<div class="main"><div class="grid4" style="height:100%">${T.map(t=>`<div class="tile plain" style="--k:${KC[t[0]]}" data-tap="open" data-arg="${t[0]}"><div class="ic">${ic(t[0])}</div><div>${t[1]}</div></div>`).join('')}</div></div>`};
+
+/* Memory: beginnt mit 3 Paaren, wird nach jedem Sieg etwas größer (max. 6 Paare) */
+const CATS={obst:['🍎','🍌','🍇','🍓','🍐','🍒','🍑','🍋'],tiere:['🐶','🐱','🐰','🐻','🐷','🐮','🐸','🐔'],
+  fahrzeuge:['🚗','🚌','🚲','🚂','✈️','🚜','⛵','🚑'],kleidung:['👕','👖','👗','🧦','🧢','🧤','👟','🧣'],
+  musik:['🎸','🎺','🥁','🎻','🎹','🎷'],blumen:['🌻','🌹','🌷','🌼','🌸','🌵']};
+let memLevel=3,mem=null;
+screens.memory=()=>{const set=shuffle(CATS[pick(['obst','tiere','fahrzeuge','blumen'])]).slice(0,memLevel);const cards=shuffle([...set,...set]);
+  const cols=land()?({3:3,4:4,5:5,6:4}[memLevel]):({3:2,4:2,5:2,6:3}[memLevel]);
+  app.innerHTML=bar('memory','Memory')+`<div class="main"><div class="tiles" style="grid-template-columns:repeat(${cols},1fr)">
+   ${cards.map((c,i)=>`<div class="card" data-tap="flip" data-arg="${i}"><span class="face">${c}</span></div>`).join('')}</div></div>`;
+  mem={cards,open:[],done:0,lock:false}};
+A.flip=(i,el)=>{if(!mem||mem.lock||el.classList.contains('up'))return;el.classList.add('up');mem.open.push(el);
+  if(mem.open.length<2)return;const [a,b]=mem.open;
+  if(mem.cards[a.dataset.arg]===mem.cards[b.dataset.arg]){a.classList.add('done');b.classList.add('done');mem.open=[];mem.done++;
+    if(mem.done===mem.cards.length/2)celebrate(()=>{memLevel=Math.min(6,memLevel+1);go('memory')});else ding()}
+  else{mem.lock=true;later(()=>{a.classList.remove('up');b.classList.remove('up');mem.open=[];mem.lock=false},1400)}};
+
+/* Gleiches finden */
+let sameN=0,sameT=null;
+screens.same=()=>{const pool=Object.values(CATS).flat();const n=sameN>=6?4:3;
+  sameT=pick(pool);const opts=shuffle([sameT,...shuffle(pool.filter(x=>x!==sameT)).slice(0,n-1)]);
+  const cols=land()?n:(n===4?2:3);
+  app.innerHTML=bar('same','Gleiches finden')+`<div class="main"><div class="same"><div class="target">${sameT}</div>
+   <div class="tiles" style="grid-template-columns:repeat(${cols},1fr)">${opts.map(o=>`<div class="tile c-o gt" data-tap="sameAns" data-arg="${o}">${o}</div>`).join('')}</div></div></div>`};
+A.sameAns=(o,el)=>{if(o===sameT){el.classList.add('right');el.removeAttribute('data-tap');sameN++;
+  if(sameN%5===0)celebrate(()=>go('same'));else{ding();later(()=>go('same'),900)}}
+  else{el.classList.add('wrong');el.removeAttribute('data-tap')}};
+
+/* Was passt nicht? */
+let oddN=0,oddT=null;
+screens.odd=()=>{const keys=shuffle(Object.keys(CATS));const main=shuffle(CATS[keys[0]]).slice(0,3);oddT=pick(CATS[keys[1]]);
+  const opts=shuffle([...main,oddT]);const cols=land()?4:2;
+  app.innerHTML=bar('odd','Was passt nicht?')+`<div class="main"><div class="tiles" style="grid-template-columns:repeat(${cols},1fr)">
+   ${opts.map(o=>`<div class="tile c-v gt" data-tap="oddAns" data-arg="${o}">${o}</div>`).join('')}</div></div>`};
+A.oddAns=(o,el)=>{if(o===oddT){el.classList.add('right');el.removeAttribute('data-tap');oddN++;
+  if(oddN%5===0)celebrate(()=>go('odd'));else{ding();later(()=>go('odd'),1000)}}
+  else{el.classList.add('wrong');el.removeAttribute('data-tap')}};
+
+/* Ballons: langsam aufsteigend, Antippen lässt sie platzen */
+screens.balloons=()=>{app.innerHTML=bar('balloons','Ballons')+`<div class="main" id="sky"><div class="score" id="score">Punkte: 0</div></div>`;
+  const sky=$('#sky');let n=0;const hues=[0,40,90,160,200,260,300];
+  const spawn=()=>{if(sky.querySelectorAll('.balloon').length>=4)return;const b=document.createElement('div');b.className='balloon';b.textContent='🎈';
+    const w=sky.clientWidth,h=sky.clientHeight;b.style.left=Math.max(0,Math.random()*(w-180))+'px';b.style.top=h+'px';
+    b.style.filter=`hue-rotate(${pick(hues)}deg)`;b.style.setProperty('--d',-(h+260)+'px');b.style.animationDuration=(9+Math.random()*4)+'s';
+    b.addEventListener('animationend',()=>b.remove());
+    b.addEventListener('pointerdown',e=>{if(b.dataset.p)return;b.dataset.p=1;e.stopPropagation();popSnd();
+      const r=b.getBoundingClientRect(),sr=sky.getBoundingClientRect();b.style.animation='none';b.style.top=(r.top-sr.top)+'px';b.style.transform='none';
+      b.textContent='💥';b.style.filter='none';n++;$('#score').textContent='Punkte: '+n;setTimeout(()=>b.remove(),350);
+      if(n%10===0)celebrate()});
+    sky.appendChild(b)};
+  spawn();every(spawn,1800)};
+
+/* ---------- Bewegungsspiele ----------
+   Gemeinsame Regeln: ein Finger reicht, überall auf der Spielfläche. Kein „Game Over“,
+   Fehler kosten keine Punkte. Tempo in den Einstellungen wählbar. */
+const EFONT='"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+function emo(ctx,ch,x,y,size,flip,rot,alpha){ctx.save();ctx.translate(x,y);if(rot)ctx.rotate(rot);if(flip)ctx.scale(-1,1);
+  if(alpha!=null)ctx.globalAlpha=alpha;ctx.font=`${Math.round(size)}px ${EFONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(ch,0,size*.06);ctx.restore()}
+function arcade(icon,label,make){
+  app.innerHTML=bar(icon,label)+`<div class="main"><div class="drawwrap" id="gw"><canvas id="gc" style="display:block;touch-action:none"></canvas></div></div>`;
+  const cv=$('#gc'),ctx=cv.getContext('2d'),wrap=$('#gw');
+  const st={W:1,H:1,m:1,score:0,px:null,py:null,t:0,
+    hit(){st.score++;if(st.score%10===0)celebrate();else ding()}};
+  const game=make(ctx,st);
+  const fit=()=>{const r=wrap.getBoundingClientRect(),dpr=devicePixelRatio||1;cv.width=Math.floor(r.width*dpr);cv.height=Math.floor(r.height*dpr);
+    cv.style.width=r.width+'px';cv.style.height=r.height+'px';ctx.setTransform(dpr,0,0,dpr,0,0);st.W=r.width;st.H=r.height;st.m=Math.min(r.width,r.height);game.resize&&game.resize()};
+  fit();resizeHook=fit;
+  let pid=null;const pt=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+  cv.addEventListener('pointerdown',e=>{if(pid!==null)return;pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}
+    const p=pt(e);st.px=p.x;st.py=p.y;game.tap&&game.tap(p)});
+  cv.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;const p=pt(e);st.px=p.x;st.py=p.y});
+  const end=e=>{if(e.pointerId===pid)pid=null};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  const g=gen;let last=performance.now();
+  const loop=t=>{if(g!==gen)return;const dt=Math.min(.05,(t-last)/1000)*(+S.speed||.8);last=t;st.t+=dt;
+    game.step(dt);ctx.clearRect(0,0,st.W,st.H);game.draw();
+    ctx.font=`700 ${Math.round(st.m*.055)}px "Atkinson Hyperlegible",system-ui,sans-serif`;ctx.textAlign='right';ctx.textBaseline='top';ctx.fillStyle='#5F6B76';
+    ctx.fillText('Punkte: '+st.score,st.W-16,12);
+    if(st.t<4&&game.hint){emo(ctx,game.hint,st.W/2,st.H*.18,st.m*.14,false,0,Math.max(0,1-st.t/4))}
+    requestAnimationFrame(loop)};
+  requestAnimationFrame(loop)}
+
+/* Ball: Brett folgt dem Finger, Ball abprallen lassen (wie Pong, gegen die Wand) */
+screens.ball=()=>arcade('ball','Ball',(ctx,st)=>{let b=null,pad={x:0,y:0,w:0,h:0};
+  const reset=()=>{b={x:st.W/2,y:st.H*.15,r:st.m*.055,vx:(Math.random()<.5?-1:1)*st.H*.18,vy:st.H*.32}};
+  return{hint:'👆',resize(){if(!b)reset()},
+    step(dt){const pw=Math.max(st.W*.3,170),ph=st.m*.05;pad={x:Math.max(pw/2,Math.min(st.W-pw/2,st.px??st.W/2)),y:st.H-ph*1.8,w:pw,h:ph};
+      b.x+=b.vx*dt;b.y+=b.vy*dt;
+      if(b.x<b.r){b.x=b.r;b.vx=Math.abs(b.vx)}if(b.x>st.W-b.r){b.x=st.W-b.r;b.vx=-Math.abs(b.vx)}if(b.y<b.r){b.y=b.r;b.vy=Math.abs(b.vy)}
+      if(b.vy>0&&b.y+b.r>=pad.y-pad.h/2&&b.y<pad.y+pad.h/2&&Math.abs(b.x-pad.x)<pad.w/2+b.r*.7){
+        b.vy=-Math.abs(b.vy);b.vx=((b.x-pad.x)/(pad.w/2))*st.H*.3;st.hit()}
+      if(b.y-b.r>st.H)reset()},
+    draw(){ctx.fillStyle='#2F6690';ctx.beginPath();ctx.roundRect(pad.x-pad.w/2,pad.y-pad.h/2,pad.w,pad.h,pad.h/2);ctx.fill();
+      emo(ctx,'⚽',b.x,b.y,b.r*2)}}});
+
+/* Hüpfen: irgendwo tippen = springen, über Hindernisse (wie das Dino-Spiel) */
+screens.hop=()=>arcade('hop','Springen',(ctx,st)=>{let y=0,vy=0,obs=[],next=2;
+  return{hint:'👆',
+    tap(){if(y<=1){const s=st.m*.16;vy=s*6.5}},
+    step(dt){const s=st.m*.16,g=s*9,v=st.W*.2;vy-=g*dt;y+=vy*dt;if(y<0){y=0;vy=0}
+      next-=dt;if(next<=0){obs.push({x:st.W+s,ch:pick(['🌵','📦','🚧']),hit:false,passed:false});next=2+Math.random()*1.8}
+      const rx=st.W*.18;
+      obs.forEach(o=>{o.x-=v*dt;
+        if(!o.hit&&!o.passed&&Math.abs(o.x-rx)<s*.55&&y<s*.55){o.hit=true;tone([300],.1,.2,.12)}
+        if(!o.passed&&o.x<rx-s*.6){o.passed=true;if(!o.hit)st.hit()}});
+      obs=obs.filter(o=>o.x>-s)},
+    draw(){const s=st.m*.16,G=st.H*.8,rx=st.W*.18;
+      ctx.strokeStyle='#c7c7cd';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,G);ctx.lineTo(st.W,G);ctx.stroke();
+      obs.forEach(o=>emo(ctx,o.ch,o.x,G-s*.4,s*.8,false,0,o.hit?.3:1));
+      emo(ctx,'🏃',rx,G-s*.5-y,s,true)}}});
+
+/* Weltraum: Rakete folgt dem Finger und schießt von selbst (wie Space Invaders, nur gemütlich) */
+screens.space=()=>arcade('space','Weltraum',(ctx,st)=>{let sx=null,shots=[],al=[],fire=0,spawn=.5;
+  return{hint:'👆',
+    step(dt){const s=st.m*.13;if(sx===null)sx=st.W/2;const tx=st.px??sx;sx+=(tx-sx)*Math.min(1,dt*8);
+      const sy=st.H-s*.8;fire-=dt;if(fire<=0){shots.push({x:sx,y:sy-s*.5});fire=.5}
+      shots.forEach(p=>p.y-=st.H*.9*dt);shots=shots.filter(p=>p.y>-20);
+      spawn-=dt;if(spawn<=0&&al.length<5){al.push({x:s/2+Math.random()*(st.W-s),y:-s/2,vx:(Math.random()-.5)*st.W*.08,ch:pick(['👾','🛸','☄️']),boom:0});spawn=1.5}
+      al.forEach(a=>{if(a.boom){a.boom-=dt;return}a.y+=st.H*.07*dt;a.x+=a.vx*dt;if(a.x<s/2||a.x>st.W-s/2)a.vx*=-1;
+        for(const p of shots){if(!p.used&&Math.hypot(p.x-a.x,p.y-a.y)<s*.6){p.used=true;a.boom=.4;popSnd();st.hit();break}}});
+      shots=shots.filter(p=>!p.used);al=al.filter(a=>a.y<st.H+s&&!(a.boom<0))},
+    draw(){const s=st.m*.13;ctx.fillStyle='#fb8c00';shots.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,s*.09,0,7);ctx.fill()});
+      al.forEach(a=>emo(ctx,a.boom?'💥':a.ch,a.x,a.y,s));emo(ctx,'🚀',sx??st.W/2,st.H-s*.8,s,false,-Math.PI/4)}}});
+
+/* Futter sammeln: Maus folgt dem Finger und sammelt Käse (wie Pac-Man, ohne Labyrinth).
+   Ab 8 Punkten schleicht eine langsame Katze herum – erwischt sie die Maus, läuft sie nur weg. */
+screens.mouse=()=>arcade('mouse','Sammeln',(ctx,st)=>{let m=null,face=1,food=[],cat=null;
+  const rnd=s=>({x:s+Math.random()*(st.W-2*s),y:s+Math.random()*(st.H-2*s)});
+  const corner=()=>{const c=[[0,0],[st.W,0],[st.W,st.H],[0,st.H]].map(([x,y])=>({x,y,d:Math.hypot(x-m.x,y-m.y)})).sort((a,b)=>b.d-a.d)[0];
+    const s=st.m*.13;return{x:Math.min(st.W-s,Math.max(s,c.x)),y:Math.min(st.H-s,Math.max(s,c.y))}};
+  return{hint:'👆',resize(){if(!m)m={x:st.W/2,y:st.H/2}},
+    step(dt){const s=st.m*.13,sp=st.m*.6;
+      if(st.px!=null){const dx=st.px-m.x,dy=st.py-m.y,d=Math.hypot(dx,dy);if(d>2){const k=Math.min(d,sp*dt)/d;m.x+=dx*k;m.y+=dy*k;if(Math.abs(dx)>4)face=dx>0?1:-1}}
+      while(food.length<3)food.push(rnd(s));
+      food=food.filter(f=>{if(Math.hypot(f.x-m.x,f.y-m.y)<s*.7){st.hit();return false}return true});
+      if(st.score>=8&&!cat)cat=corner();
+      if(cat){const dx=m.x-cat.x,dy=m.y-cat.y,d=Math.hypot(dx,dy);const k=Math.min(d,sp*.3*dt)/(d||1);cat.x+=dx*k;cat.y+=dy*k;cat.f=dx>0?1:-1;
+        if(d<s*.6){tone([300],.1,.2,.12);const c=corner();cat.x=c.x;cat.y=c.y}}},
+    draw(){const s=st.m*.13;food.forEach(f=>emo(ctx,'🧀',f.x,f.y,s*.8));if(cat)emo(ctx,'🐈',cat.x,cat.y,s*1.1,cat.f>0);
+      emo(ctx,'🐭',m.x,m.y,s,face>0)}}});
+
+/* Bilder ansehen – nur ansehen, kein Löschen/Bearbeiten */
+screens.photos=async()=>{const g=gen;app.innerHTML=bar('photos','Bilder')+`<div class="main"><div class="scroll" id="pg"></div></div>`;
+  const p=await getPhotos();if(g!==gen)return;const pg=$('#pg');
+  if(!p.length){pg.innerHTML=`<div class="empty"><div class="ic">${ic('photos')}</div><div>Noch keine Bilder</div></div>`;return}
+  pg.innerHTML=`<div class="pgrid">${p.map((x,i)=>`<div class="ph" data-tap="view" data-arg="${i}"><img src="${x.thumb}" alt=""></div>`).join('')}</div>`};
+A.view=i=>go('viewer',+i);
+screens.viewer=async(i)=>{const g=gen;app.innerHTML=bar('photos','Bilder',`<div class="barbtn" data-tap="slide" id="slideBtn">${ic('play')}</div>`)+
+  `<div class="main"><div class="viewer"><img id="vimg" alt=""><div class="nav l" data-tap="prev">${ic('left')}</div><div class="nav r" data-tap="next">${ic('right')}</div></div></div>`;
+  const p=await getPhotos();if(g!==gen)return;if(!p.length){go('photos');return}
+  cur.arg=Math.max(0,Math.min(p.length-1,i||0));$('#vimg').src=p[cur.arg].full;
+  let sx=null;const img=$('#vimg');
+  img.addEventListener('pointerdown',e=>{sx=e.clientX});
+  img.addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>80)(dx<0?A.next:A.prev)()})};
+async function showPhoto(d){const p=await getPhotos();if(!p.length||cur.name!=='viewer')return;cur.arg=(cur.arg+d+p.length)%p.length;const im=$('#vimg');if(im)im.src=p[cur.arg].full}
+A.next=()=>showPhoto(1);A.prev=()=>showPhoto(-1);
+function startSlide(){slideOn=true;const b=$('#slideBtn');if(b)b.innerHTML=ic('pause');every(()=>{if(slideOn)showPhoto(1)},6000)}
+A.slide=()=>{if(slideOn){go('viewer',cur.arg)}else startSlide()};
+
+/* Malen */
+const COLORS=['#1d1d1f','#e53935','#1e88e5','#43a047','#fdd835','#fb8c00','#8e24aa'];
+const dr={color:'#1d1d1f',size:12,erase:false};
+screens.draw=()=>{
+  app.innerHTML=bar('draw','Malen')+`<div class="main"><div class="drawwrap" id="dw"><canvas id="cv"></canvas></div></div>
+   <div class="tools">${COLORS.map(c=>`<div class="dot${c===dr.color&&!dr.erase?' sel':''}" data-tap="color" data-arg="${c}" style="background:${c}"></div>`).join('')}
+   <div class="tool" data-tap="size" id="tSize">${ic(dr.size>20?'thick':'thin')}</div><div class="tool${dr.erase?' sel':''}" data-tap="erase" id="tErase">${ic('eraser')}</div><div class="tool" data-tap="trash">${ic('trash')}</div></div>`;
+  const cv=$('#cv'),ctx=cv.getContext('2d'),wrap=$('#dw');
+  const fit=()=>{const r=wrap.getBoundingClientRect(),dpr=devicePixelRatio||1;let tmp=null;
+    if(cv.width){tmp=document.createElement('canvas');tmp.width=cv.width;tmp.height=cv.height;tmp.getContext('2d').drawImage(cv,0,0)}
+    cv.width=Math.floor(r.width*dpr);cv.height=Math.floor(r.height*dpr);cv.style.width=r.width+'px';cv.style.height=r.height+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,r.width,r.height);if(tmp)ctx.drawImage(tmp,0,0,tmp.width/dpr,tmp.height/dpr)};
+  fit();resizeHook=fit;
+  let pid=null,last=null;const pt=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+  const stroke=(a,b)=>{ctx.strokeStyle=dr.erase?'#fff':dr.color;ctx.lineWidth=dr.erase?dr.size*2.5:dr.size;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()};
+  cv.addEventListener('pointerdown',e=>{if(pid!==null)return;pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}last=pt(e);stroke(last,{x:last.x+.1,y:last.y})});
+  cv.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;const p=pt(e);stroke(last,p);last=p});
+  const end=e=>{if(e.pointerId===pid)pid=null};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  A._clearDraw=()=>{const r=wrap.getBoundingClientRect();ctx.fillStyle='#fff';ctx.fillRect(0,0,r.width,r.height)}};
+A.color=(c,el)=>{dr.color=c;dr.erase=false;document.querySelectorAll('.dot').forEach(d=>d.classList.toggle('sel',d===el));$('#tErase').classList.remove('sel')};
+A.size=(_, el)=>{dr.size=dr.size>20?12:30;el.innerHTML=ic(dr.size>20?'thick':'thin')};
+A.erase=(_, el)=>{dr.erase=!dr.erase;el.classList.toggle('sel',dr.erase);if(dr.erase)document.querySelectorAll('.dot').forEach(d=>d.classList.remove('sel'))};
+A.trash=()=>confirmBox({big:`<span style="display:inline-flex;width:1em;height:1em;color:#B4553A">${ic('trash')}</span>`,text:'Bild löschen?',onYes:()=>A._clearDraw&&A._clearDraw()});
+
+/* Nachrichten */
+const QUICK=[['👋','Hallo!'],['😊','Mir geht es gut'],['😔','Mir geht es nicht gut'],['📞','Bitte ruf mich an'],
+  ['🏠','Besuch mich bitte'],['❤️','Ich hab dich lieb'],['🙏','Danke'],['💬','']];
+function avatar(c){return c.photo?`<img class="av" src="${c.photo}" alt="">`:`<div class="av">${c.emoji||'🙂'}</div>`}
+function normNum(n){let d=String(n||'').trim();if(d.startsWith('+'))return d.slice(1).replace(/\D/g,'');d=d.replace(/\D/g,'');
+  if(d.startsWith('00'))return d.slice(2);if(d.startsWith('0'))return (S.cc||'43')+d.slice(1);return d}
+function msgLink(c,text){const d=normNum(c.phone);if(c.app==='signal')return 'https://signal.me/#p/+'+d;
+  return 'https://wa.me/'+d+(text?'?text='+encodeURIComponent(text):'')}
+const CCOL=['g','b','y','p','v','o'];
+screens.contacts=()=>{
+  if(!contacts.length){app.innerHTML=bar('contacts','Nachrichten')+`<div class="main"><div class="empty"><div class="ic">${ic('user')}</div><div>Noch keine Kontakte</div><div style="font-size:16px">Angehörige: Einstellungen über die Ecken ↖ ↗ ↘ ↙</div></div></div>`;return}
+  const n=contacts.length;const cols=land()?Math.min(4,Math.max(2,Math.ceil(n/2))):(n<=2?1:2);
+  app.innerHTML=bar('contacts','Nachrichten')+`<div class="main"><div class="${n>8?'scroll':''}" style="height:100%"><div class="tiles" style="grid-template-columns:repeat(${cols},1fr)${n>8?';height:auto;grid-auto-rows:minmax(240px,1fr)':''}">
+   ${contacts.map((c,i)=>`<div class="tile ctile plain" data-tap="contact" data-arg="${i}">${avatar(c)}<div>${esc(c.name)}</div></div>`).join('')}</div></div></div>`};
+A.contact=i=>{go('contact',+i);speak(contacts[+i]?.name||'')};
+screens.contact=i=>{const c=contacts[i];if(!c){go('contacts');return}
+  const cols=land()?4:2;
+  app.innerHTML=bar(`<span style="display:inline-flex;width:clamp(60px,10vmin,100px);height:clamp(60px,10vmin,100px)">${avatar(c).replace('class="av"','class="av" style="width:100%;height:100%;font-size:clamp(36px,6vmin,60px)"')}</span>`,c.name)+
+   `<div class="main"><div class="tiles" style="grid-template-columns:repeat(${cols},1fr)">
+   ${QUICK.map((q,k)=>`<div class="tile qt plain" style="--k:${KC.contacts}" data-tap="quick" data-arg="${k}"><div class="ic">${k===7?ic('contacts'):q[0]}</div><div>${q[1]||'Chat öffnen'}</div></div>`).join('')}</div></div>`};
+A.quick=k=>{const c=contacts[cur.arg];if(!c)return;const [qi,tx]=QUICK[+k];
+  if(tx)speak(tx);else speak('Chat öffnen');
+  const sig=c.app==='signal';
+  const note=sig?(tx?'Signal öffnet den Chat. Der Text kann bei Signal nicht vorausgefüllt werden.':'Signal öffnet den Chat.')
+                :(tx?'WhatsApp öffnet sich mit dem Text. Dort noch einmal auf den grünen Pfeil tippen.':'WhatsApp öffnet den Chat.');
+  confirmBox({big:`<span style="display:inline-flex;width:clamp(90px,18vmin,170px);height:clamp(90px,18vmin,170px)">${avatar(c).replace('class="av"','class="av" style="width:100%;height:100%;font-size:clamp(54px,11vmin,100px)"')}</span><span style="display:inline-flex;width:.7em;height:.7em;color:#AEB7C0">${ic('right')}</span><span>${+k===7?`<span style="display:inline-flex;width:1em;height:1em;color:#1F7A7A">${ic('contacts')}</span>`:qi}</span>`,
+    text:tx,note,href:msgLink(c,tx)})};
+
+/* Schreiben & Vorlesen: eigene große Tastatur, Wort-Knöpfe, Vorlesen, an Kontakt senden */
+let wText=lsGet('et_write',''),wNum=false;
+const KB=[['Q','W','E','R','T','Z','U','I','O','P','Ü'],['A','S','D','F','G','H','J','K','L','Ö','Ä'],['Y','X','C','V','B','N','M','ß','?','.']];
+const KBN=[['1','2','3','4','5','6','7','8','9','0'],['+','-',':','/','€','%','(',')','!',','],['@','&','*','=','"','?','.']];
+const WORDS=[['👍','Ja'],['👎','Nein'],['👋','Hallo'],['🙂','Bitte'],['🙏','Danke'],['😊','Gut'],['💧','Wasser'],['🍽️','Essen'],
+  ['🚻','Toilette'],['🤕','Schmerzen'],['😴','Müde'],['🆘','Hilfe']];
+function avBig(c){return `<span style="display:inline-flex;width:clamp(90px,18vmin,170px);height:clamp(90px,18vmin,170px)">${avatar(c).replace('class="av"','class="av" style="width:100%;height:100%;font-size:clamp(54px,11vmin,100px)"')}</span>`}
+screens.write=()=>{
+  app.innerHTML=bar('write','Schreiben')+`<div class="main wmain">
+   <div class="wtop"><div class="wtext" id="wt"></div><div class="wbtns">
+    <div class="wb" style="--k:#2E7D4F" data-tap="wSpeak">${ic('speak')}</div><div class="wb" style="--k:#1F7A7A" data-tap="wSend">${ic('send')}</div><div class="wb" style="--k:#8A95A0" data-tap="wClear">${ic('trash')}</div></div></div>
+   <div class="words">${WORDS.map(w=>`<div class="chip" data-tap="wWord" data-arg="${w[1]}">${w[0]} ${w[1]}</div>`).join('')}</div>
+   <div class="kb" id="kb"></div></div>`;
+  renderKB();updW()};
+function renderKB(){const L=wNum?KBN:KB;$('#kb').innerHTML=L.map(r=>`<div class="kr">${r.map(k=>`<div class="key" data-tap="wKey" data-arg="${esc(k)}">${esc(k)}</div>`).join('')}</div>`).join('')+
+  `<div class="kr"><div class="key k2" data-tap="wNum">${wNum?'ABC':'123'}</div><div class="key k6" data-tap="wKey" data-arg=" ">␣</div><div class="key k3 kdel" data-tap="wDel">⌫</div></div>`}
+function updW(){const el=$('#wt');if(!el)return;el.innerHTML=wText?esc(wText)+'<span class="caret"></span>':'<span class="caret"></span><span class="ph"> ✏️</span>';el.scrollTop=el.scrollHeight;lsSet('et_write',wText)}
+const click=()=>tone([1200],0,.05,.06,'square');
+A.wKey=k=>{if(/^[A-ZÄÖÜ]$/.test(k)){const cap=wText.trim()===''||/[.!?]\s*$/.test(wText);if(!cap)k=k.toLowerCase()}
+  if(k===' '&&(wText===''||wText.endsWith(' ')))return;if(/^[.?!,:]$/.test(k)&&wText.endsWith(' '))wText=wText.slice(0,-1);wText+=k;click();updW()};
+A.wWord=w=>{const cap=wText.trim()===''||/[.!?]\s*$/.test(wText);if(wText&&!wText.endsWith(' '))wText+=' ';
+  wText+=(cap?w:(['Ja','Nein','Hallo','Bitte','Danke','Gut'].includes(w)?w.toLowerCase():w))+' ';speak(w,true);updW()};
+A.wDel=()=>{if(!wText)return;wText=wText.slice(0,-1);click();updW()};
+A.wNum=()=>{wNum=!wNum;renderKB()};
+A.wSpeak=()=>{if(wText.trim())speak(wText,true)};
+A.wClear=()=>{if(!wText)return;confirmBox({big:`<span style="display:inline-flex;width:1em;height:1em;color:#B4553A">${ic('trash')}</span>`,text:'Text löschen?',onYes:()=>{wText='';updW()}})};
+A.wSend=()=>{if(!wText.trim())return;closeOvl();const d=document.createElement('div');d.id='ovl';d.className='ovl';const n=contacts.length;
+  d.innerHTML=`<div class="ovlbox" style="max-width:1100px"><div class="ovltext">An wen senden?</div>
+   ${n?`<div class="tiles" style="width:100%;height:auto;grid-template-columns:repeat(${Math.min(4,n)},1fr);grid-auto-rows:minmax(160px,auto)">
+   ${contacts.map((c,i)=>`<div class="tile ctile plain" data-tap="wTo" data-arg="${i}">${avatar(c)}<div>${esc(c.name)}</div></div>`).join('')}</div>`
+   :'<div class="ovlnote">Noch keine Kontakte. Angehörige: Einstellungen über die Ecken ↖ ↗ ↘ ↙</div>'}
+   <div class="ovlbtns"><div class="bigbtn no" data-tap="ovlNo">${ic('x')}</div></div></div>`;document.body.appendChild(d)};
+A.wTo=i=>{const c=contacts[+i];if(!c)return;speak(c.name);
+  confirmBox({big:avBig(c)+`<span style="display:inline-flex;width:.7em;height:.7em;color:#AEB7C0">${ic('right')}</span><span style="display:inline-flex;width:1em;height:1em;color:#6A4C93">${ic('write')}</span>`,text:wText,href:msgLink(c,wText),
+   note:c.app==='signal'?'Signal öffnet den Chat. Der Text kann bei Signal nicht vorausgefüllt werden.':'WhatsApp öffnet sich mit dem Text. Dort noch einmal auf den grünen Pfeil tippen.'})};
+
+/* ---------- Einstellungen (für Angehörige) ---------- */
+let pendingPhoto=null,pendingEmoji='👩';
+const EMOS=['👩','👨','👵','👴','👧','👦','👩‍⚕️','🧑','🐶','❤️'];
+screens.admin=async()=>{speak('');
+  app.innerHTML=`<div class="admin">
+  <div class="ahead"><h1>⚙️ Einstellungen</h1><div class="abtn" data-tap="adminDone">Fertig ✔</div></div>
+  <section><h2>Kontakte</h2><div id="clist"></div>
+   <div style="margin-top:12px;padding:14px;border:2px dashed var(--line);border-radius:16px">
+    <strong>Neuer Kontakt</strong>
+    <label>Name<input type="text" id="cName" placeholder="z.B. Anna"></label>
+    <label>Handynummer<input type="tel" id="cPhone" placeholder="+43 664 1234567"></label>
+    <label>Messenger<select id="cApp"><option value="whatsapp">WhatsApp</option><option value="signal">Signal</option></select></label>
+    <div>Symbol<div class="emorow" id="cEmo">${EMOS.map(e=>`<span data-tap="pickEmo" data-arg="${e}" class="${e===pendingEmoji?'sel':''}">${e}</span>`).join('')}</div></div>
+    <label>oder Foto <input type="file" id="cPhoto" accept="image/*"><img id="cPrev" class="prev" style="display:none" alt=""></label>
+    <div class="abtn" data-tap="addContact">➕ Kontakt speichern</div><div class="msg" id="cMsg"></div>
+   </div></section>
+  <section><h2>Bilder</h2><p id="pcount" class="note">…</p>
+   <label class="abtn" style="display:inline-flex">🖼️ Bilder hinzufügen<input type="file" id="pAdd" accept="image/*" multiple hidden></label>
+   <div class="abtn red" data-tap="clearPhotos">Alle Bilder entfernen</div>
+   <p class="note">Im Prototyp werden die Bilder nur in diesem Browser gespeichert. Die Android-App liest später direkt die Fotos vom Tablet.</p></section>
+  <section><h2>Bedienung</h2>
+   <label class="chk"><input type="checkbox" id="sSpeak" ${S.speak?'checked':''}> Tasten vorlesen</label>
+   <label class="chk"><input type="checkbox" id="sSound" ${S.sound?'checked':''}> Freundliche Töne in Spielen</label>
+   <label class="chk"><input type="checkbox" id="sSaver" ${S.saver?'checked':''}> Diashow, wenn niemand das Tablet benutzt</label>
+   <label class="chk"><input type="checkbox" id="sHint" ${S.hint?'checked':''}> Hinweis auf die Ecken-Geste anzeigen</label>
+   <label>Ohne Bedienung zurück zum Start nach
+    <select id="sIdle">${[[60,'1 Minute'],[120,'2 Minuten'],[300,'5 Minuten'],[0,'nie']].map(o=>`<option value="${o[0]}" ${+S.idle===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></label>
+   <label>Tempo der Bewegungsspiele (Ball, Hüpfen, Weltraum, Futter)
+    <select id="sSpeed">${[[.6,'Sehr langsam'],[.8,'Langsam'],[1,'Normal'],[1.3,'Schneller']].map(o=>`<option value="${o[0]}" ${+S.speed===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></label>
+   <label>Ländervorwahl für Nummern mit 0 am Anfang<input type="text" id="sCC" value="${esc(S.cc)}" style="max-width:120px"></label>
+  </section>
+  <section><h2>Bildschirm</h2><div class="abtn light" data-tap="fullscreen">⛶ Vollbild</div></section>
+  <section><h2>Anleitung für Angehörige</h2><div class="note">
+   <p><b>Einstellungen öffnen:</b> nacheinander die vier Ecken antippen: links oben → rechts oben → rechts unten → links unten (innerhalb von 8 Sekunden).</p>
+   <p><b>Nachrichten:</b> Er tippt auf eine Person, dann auf ein Symbol, dann auf das grüne ✔. WhatsApp öffnet sich mit dem Text, dort muss noch auf „Senden“ getippt werden.</p>
+   <p><b>Schreiben:</b> Große Tastatur und Wort-Knöpfe. 🔊 liest den Text vor (auch wenn „Tasten vorlesen“ aus ist), 💬 schickt ihn an einen Kontakt, 🗑️ löscht ihn nach Bestätigung.</p>
+   <p><b>Prototyp:</b> Die Bildschirmsperre ist noch nicht aktiv. Sie kommt mit der Android-App (Startbildschirm-App + Anheften bzw. Kiosk-Modus).</p></div></section>
+  </div>`;
+  renderCList();
+  $('#cPhoto').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const b=await resize(f,300,true);pendingPhoto=await toDataURL(b);
+    const p=$('#cPrev');if(p&&pendingPhoto){p.src=pendingPhoto;p.style.display='inline-block'}});
+  $('#pAdd').addEventListener('change',async e=>{const fs=[...e.target.files];const pc=$('#pcount');let k=0;
+    for(const f of fs){k++;if(pc)pc.textContent=`Speichere Bild ${k} von ${fs.length} …`;const full=await resize(f,1920),thumb=await resize(f,420,true);await dbAdd({full,thumb})}
+    resetPhotos();e.target.value='';updCount()});
+  const bind=(id,key,conv)=>$('#'+id).addEventListener('change',e=>{S[key]=conv(e.target);saveS();resetIdle()});
+  bind('sSpeak','speak',t=>t.checked);bind('sSound','sound',t=>t.checked);bind('sSaver','saver',t=>t.checked);bind('sHint','hint',t=>t.checked);
+  bind('sIdle','idle',t=>+t.value);bind('sSpeed','speed',t=>+t.value);bind('sCC','cc',t=>t.value.replace(/\D/g,'')||'43');
+  updCount()};
+async function updCount(){const p=await getPhotos();const el=$('#pcount');if(el)el.textContent=p.length?`${p.length} Bilder gespeichert.`:'Noch keine Bilder.'}
+function renderCList(){const el=$('#clist');if(!el)return;
+  el.innerHTML=contacts.length?contacts.map((c,i)=>`<div class="crow">${avatar(c)}<div class="meta"><b>${esc(c.name)}</b><small>${esc(c.phone)} · ${c.app==='signal'?'Signal':'WhatsApp'}</small></div>
+   ${i>0?`<div class="abtn light sm" data-tap="moveUp" data-arg="${i}">⬆</div>`:''}<div class="abtn red sm" data-tap="delContact" data-arg="${i}">Entfernen</div></div>`).join('')
+   :'<p class="note">Noch keine Kontakte.</p>'}
+A.pickEmo=(e,el)=>{pendingEmoji=e;pendingPhoto=null;document.querySelectorAll('#cEmo span').forEach(s=>s.classList.toggle('sel',s===el));
+  const p=$('#cPrev');if(p)p.style.display='none';const f=$('#cPhoto');if(f)f.value=''};
+A.addContact=()=>{const name=$('#cName').value.trim(),phone=$('#cPhone').value.trim(),m=$('#cMsg');
+  if(!name){m.className='msg';m.textContent='Bitte einen Namen eingeben.';return}
+  if(normNum(phone).length<8){m.className='msg';m.textContent='Bitte eine Handynummer eingeben, am besten mit +43 …';return}
+  contacts.push({name,phone,app:$('#cApp').value,emoji:pendingEmoji,photo:pendingPhoto});
+  if(!saveC()){m.className='msg';m.textContent='Konnte nicht dauerhaft speichern (Speicher dieses Browsers voll oder gesperrt).'}
+  else{m.className='msg ok';m.textContent='✔ Gespeichert: '+name}
+  pendingPhoto=null;$('#cName').value='';$('#cPhone').value='';$('#cPhoto').value='';$('#cPrev').style.display='none';renderCList()};
+A.delContact=i=>{const c=contacts[+i];if(!c)return;confirmBox({big:'🗑️',text:c.name+' entfernen?',onYes:()=>{contacts.splice(+i,1);saveC();renderCList()}})};
+A.moveUp=i=>{i=+i;if(i<1)return;[contacts[i-1],contacts[i]]=[contacts[i],contacts[i-1]];saveC();renderCList()};
+A.clearPhotos=()=>confirmBox({big:'🖼️🗑️',text:'Alle Bilder entfernen?',onYes:async()=>{await dbClear();resetPhotos();updCount()}});
+A.fullscreen=()=>{try{const d=document.documentElement;const p=(d.requestFullscreen||d.webkitRequestFullscreen).call(d);if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+A.adminDone=()=>go('home');
+
+/* Offline-Fähigkeit & dauerhafter Speicher, wenn als Web-App installiert */
+try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+go('home');
+</script>
+</body>
+</html>
