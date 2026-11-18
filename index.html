@@ -648,6 +648,12 @@ screens.admin=async()=>{speak('');
    <label class="abtn" style="display:inline-flex">🖼️ Bilder hinzufügen<input type="file" id="pAdd" accept="image/*" multiple hidden></label>
    <div class="abtn red" data-tap="clearPhotos">Alle Bilder entfernen</div>
    <p class="note">Im Prototyp werden die Bilder nur in diesem Browser gespeichert. Die Android-App liest später direkt die Fotos vom Tablet.</p></section>
+  <section><h2>Sicherung</h2>
+   <p class="note">Speichert Kontakte, Einstellungen und auf Wunsch die Bilder als Datei. Die Datei landet im Ordner „Downloads“ und bleibt dort, auch wenn die Browserdaten gelöscht werden. Damit lässt sich alles wiederherstellen oder ein zweites Tablet gleich einrichten.</p>
+   <label class="chk"><input type="checkbox" id="bkPhotos" checked> Bilder mitspeichern (Datei wird größer)</label>
+   <div class="abtn" data-tap="backupSave">⬇ Sicherung herunterladen</div>
+   <label class="abtn light" style="display:inline-flex">⬆ Sicherung laden<input type="file" id="bkLoad" accept=".json,application/json" hidden></label>
+   <div class="msg" id="bkMsg"></div></section>
   <section><h2>Bedienung</h2>
    <label class="chk"><input type="checkbox" id="sSpeak" ${S.speak?'checked':''}> Tasten vorlesen</label>
    <label class="chk"><input type="checkbox" id="sSound" ${S.sound?'checked':''}> Freundliche Töne in Spielen</label>
@@ -664,6 +670,7 @@ screens.admin=async()=>{speak('');
    <p><b>Einstellungen öffnen:</b> nacheinander die vier Ecken antippen: links oben → rechts oben → rechts unten → links unten (innerhalb von 8 Sekunden).</p>
    <p><b>Nachrichten:</b> Er tippt auf eine Person, dann auf ein Symbol, dann auf das grüne ✔. WhatsApp öffnet sich mit dem Text, dort muss noch auf „Senden“ getippt werden.</p>
    <p><b>Schreiben:</b> Große Tastatur und Wort-Knöpfe. 🔊 liest den Text vor (auch wenn „Tasten vorlesen“ aus ist), 💬 schickt ihn an einen Kontakt, 🗑️ löscht ihn nach Bestätigung.</p>
+   <p><b>Sicherung:</b> Nach dem Einrichten einmal „Sicherung herunterladen“ tippen und die Datei aufheben (z.B. auch per Mail an sich selbst). Nach gelöschten Browserdaten: „Sicherung laden“ und die Datei auswählen.</p>
    <p><b>Prototyp:</b> Die Bildschirmsperre ist noch nicht aktiv. Sie kommt mit der Android-App (Startbildschirm-App + Anheften bzw. Kiosk-Modus).</p></div></section>
   </div>`;
   renderCList();
@@ -675,7 +682,34 @@ screens.admin=async()=>{speak('');
   const bind=(id,key,conv)=>$('#'+id).addEventListener('change',e=>{S[key]=conv(e.target);saveS();resetIdle()});
   bind('sSpeak','speak',t=>t.checked);bind('sSound','sound',t=>t.checked);bind('sSaver','saver',t=>t.checked);bind('sHint','hint',t=>t.checked);
   bind('sIdle','idle',t=>+t.value);bind('sSpeed','speed',t=>+t.value);bind('sCC','cc',t=>t.value.replace(/\D/g,'')||'43');
+  $('#bkLoad').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const m=$('#bkMsg');let data;
+    try{data=JSON.parse(await f.text())}catch(_){m.className='msg';m.textContent='Diese Datei ist keine gültige Sicherung.';return}
+    if(!data||data.app!=='einfach-tablet'){m.className='msg';m.textContent='Diese Datei ist keine Einfach-Tablet-Sicherung.';return}
+    const np=(data.photos||[]).length,nc=(data.contacts||[]).length;let when='';try{when=' vom '+new Date(data.created).toLocaleDateString('de-AT')}catch(_){}
+    confirmBox({big:'⬆',text:'Sicherung laden?',note:`${nc} Kontakte${np?', '+np+' Bilder':''}${when}. Die aktuellen Kontakte und Einstellungen werden ersetzt${np?', die Bilder ebenfalls':''}.`,onYes:()=>restoreBackup(data)})});
   updCount()};
+function dataURLtoBlob(u){const i=u.indexOf(',');const head=u.slice(0,i),body=u.slice(i+1);const mime=(head.match(/data:([^;,]+)/)||[])[1]||'image/jpeg';
+  const bin=atob(body);const a=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)a[k]=bin.charCodeAt(k);return new Blob([a],{type:mime})}
+A.backupSave=async()=>{const m=$('#bkMsg');m.className='msg ok';m.textContent='Sicherung wird erstellt …';
+  try{const withP=$('#bkPhotos').checked;const photos=[];
+    if(withP){const recs=await dbAll();for(let i=0;i<recs.length;i++){m.textContent=`Bild ${i+1} von ${recs.length} …`;
+      const full=await toDataURL(recs[i].full);if(!full)continue;photos.push({full,thumb:recs[i].thumb?await toDataURL(recs[i].thumb):null})}}
+    const data={app:'einfach-tablet',version:1,created:new Date().toISOString(),settings:S,contacts,write:wText,photos};
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+    const a=document.createElement('a');a.href=url;a.download='einfach-tablet-sicherung-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    m.textContent=`✔ Sicherung erstellt: ${contacts.length} Kontakte${withP?', '+photos.length+' Bilder':''}. Sie liegt im Ordner „Downloads“.`}
+  catch(e){m.className='msg';m.textContent='Sicherung fehlgeschlagen: '+e.message}};
+async function restoreBackup(data){const m=$('#bkMsg');
+  try{if(data.settings&&typeof data.settings==='object')Object.assign(S,data.settings);saveS();
+    contacts=Array.isArray(data.contacts)?data.contacts.filter(c=>c&&c.name):[];saveC();
+    if(typeof data.write==='string'){wText=data.write;lsSet('et_write',wText)}
+    if(Array.isArray(data.photos)&&data.photos.length){await dbClear();
+      for(let i=0;i<data.photos.length;i++){if(m){m.className='msg ok';m.textContent=`Bild ${i+1} von ${data.photos.length} …`}
+        const p=data.photos[i];if(!p||!p.full)continue;await dbAdd({full:dataURLtoBlob(p.full),thumb:p.thumb?dataURLtoBlob(p.thumb):null})}
+      resetPhotos()}
+    go('admin');const m2=$('#bkMsg');if(m2){m2.className='msg ok';m2.textContent='✔ Sicherung geladen.'}}
+  catch(e){if(m){m.className='msg';m.textContent='Laden fehlgeschlagen: '+e.message}}}
 async function updCount(){const p=await getPhotos();const el=$('#pcount');if(el)el.textContent=p.length?`${p.length} Bilder gespeichert.`:'Noch keine Bilder.'}
 function renderCList(){const el=$('#clist');if(!el)return;
   el.innerHTML=contacts.length?contacts.map((c,i)=>`<div class="crow">${avatar(c)}<div class="meta"><b>${esc(c.name)}</b><small>${esc(c.phone)} · ${c.app==='signal'?'Signal':'WhatsApp'}</small></div>

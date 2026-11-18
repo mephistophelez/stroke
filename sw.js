@@ -1,5 +1,5 @@
 // Einfach-Tablet: hält die App offline verfügbar. Bei Änderungen VERSION erhöhen.
-const VERSION = 'einfach-v1';
+const VERSION = 'einfach-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
